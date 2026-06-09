@@ -5,6 +5,7 @@ import (
 	"demo/api/internal/auth"
 	"demo/api/internal/link"
 	"demo/api/pkg/db"
+	"demo/api/pkg/middleware"
 	"fmt"
 	"net/http"
 )
@@ -26,9 +27,16 @@ func main() {
 		LinkRepository: linkRepository,
 	})
 
+	//Middleares
+	stack := middleware.Chain(
+		middleware.CORS,
+		middleware.Logging,
+		middleware.IsAuthed,
+	)
+
 	server := http.Server{
 		Addr:    ":8081",
-		Handler: router,
+		Handler: stack(router),
 	}
 	fmt.Println("Server is listening on port 8081")
 	server.ListenAndServe()
